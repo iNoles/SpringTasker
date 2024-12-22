@@ -31,5 +31,6 @@ jobs:
           VALIDATE_SHELL_SHFMT: false
           VALIDATE_JSCPD: false
           VALIDATE_HTML: false
+          VALIDATE_HTML_PRETTIER: false
           # To report GitHub Actions status checks
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
