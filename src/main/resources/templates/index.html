@@ -10,9 +10,7 @@
   <!-- New Task Button -->
   <div class="text-right mb-6">
     <a href="/tasks/add">
-      <button
-              class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
-      >
+      <button class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400">
         Add New Task
       </button>
     </a>
@@ -28,21 +26,10 @@
     <ul class="space-y-4">
       <li th:each="task : ${tasks}">
         <div class="task-card bg-gray-50 p-4 rounded-lg shadow-md">
-          <h3
-                  class="text-xl font-semibold text-gray-800"
-                  th:text="${task.name}"
-          >
-            Task Name
-          </h3>
-          <p class="text-gray-600 mt-1" th:text="${task.description}">
-            Task Description
-          </p>
-          <p class="text-gray-500 mt-1" th:text="${task.dueDate}">
-            Due Date
-          </p>
-          <p class="text-gray-700 mt-1" th:text="${task.priority}">
-            Priority
-          </p>
+          <h3 class="text-xl font-semibold text-gray-800" th:text="${task.name}">Task Name</h3>
+          <p class="text-gray-600 mt-1" th:text="${task.description}">Task Description</p>
+          <p class="text-gray-500 mt-1" th:text="${task.dueDate}">Due Date</p>
+          <p class="text-gray-700 mt-1" th:text="${task.priority}">Priority</p>
           <p
                   class="mt-2 text-sm text-green-500"
                   th:text="${task.completed ? 'Completed' : 'Pending'}"
@@ -51,9 +38,7 @@
           <!-- Edit and Delete buttons -->
           <div class="actions mt-4 flex gap-4">
             <a th:href="@{/tasks/edit/{id}(id=${task.id})}">
-              <button
-                      class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              >
+              <button class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400">
                 Edit Task
               </button>
             </a>
@@ -64,8 +49,7 @@
             >
               <button
                       type="submit"
-                      class="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
-              >
+                      class="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400">
                 Delete Task
               </button>
             </form>
