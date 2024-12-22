@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Edit Task</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 h-screen flex items-center justify-center">
+
+<!-- Edit Task Form Container -->
+<div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
+    <h1 class="text-3xl font-semibold text-center mb-6">Edit Task</h1>
+
+    <form th:action="@{/tasks/edit}" method="post">
+        <input type="hidden" name="id" th:value="${task.id}" />
+
+        <!-- Task Name -->
+        <div class="mb-4">
+            <label for="name" class="block text-gray-700 font-medium">Task Name:</label>
+            <input type="text" id="name" name="name" th:value="${task.name}" class="w-full p-2 mt-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" required />
+        </div>
+
+        <!-- Description -->
+        <div class="mb-4">
+            <label for="description" class="block text-gray-700 font-medium">Description:</label>
+            <textarea id="description" name="description" th:text="${task.description}" class="w-full p-2 mt-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+
+        <!-- Due Date -->
+        <div class="mb-4">
+            <label for="dueDate" class="block text-gray-700 font-medium">Due Date:</label>
+            <input type="date" id="dueDate" name="dueDate" th:value="${task.dueDate}" class="w-full p-2 mt-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" required />
+        </div>
+
+        <!-- Priority -->
+        <div class="mb-4">
+            <label for="priority" class="block text-gray-700 font-medium">Priority:</label>
+            <select id="priority" name="priority" class="w-full p-2 mt-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                <option value="Low" th:selected="${task.priority == 'Low'}">Low</option>
+                <option value="Medium" th:selected="${task.priority == 'Medium'}">Medium</option>
+                <option value="High" th:selected="${task.priority == 'High'}">High</option>
+            </select>
+        </div>
+
+        <!-- Completed Checkbox -->
+        <div class="mb-4">
+            <label for="completed" class="block text-gray-700 font-medium">Completed:</label>
+            <input type="checkbox" id="completed" name="completed" th:checked="${task.completed}" class="mt-2" />
+        </div>
+
+        <!-- Submit Button -->
+        <div class="mb-4 text-center">
+            <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                Save Changes
+            </button>
+        </div>
+    </form>
+
+    <!-- Back Link -->
+    <div class="text-center mt-4">
+        <a href="/" class="text-blue-500 hover:underline">Back to Task List</a>
+    </div>
+</div>
+
+</body>
+</html>
