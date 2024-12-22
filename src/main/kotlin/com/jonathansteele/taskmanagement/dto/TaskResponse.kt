@@ -4,6 +4,7 @@ data class TaskResponse(
     val id: Long,
     val name: String,
     val description: String?,
-    val dueDate: String, // ISO format
-    val priority: String
+    // ISO format
+    val dueDate: String,
+    val priority: String,
 )

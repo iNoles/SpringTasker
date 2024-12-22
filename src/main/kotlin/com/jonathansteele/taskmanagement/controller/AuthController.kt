@@ -1,7 +1,7 @@
 package com.jonathansteele.taskmanagement.controller
 
-import com.jonathansteele.taskmanagement.repository.UserRepository
 import com.jonathansteele.taskmanagement.model.User
+import com.jonathansteele.taskmanagement.repository.UserRepository
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -13,10 +13,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes
 @Controller
 class AuthController(
     private val userRepository: UserRepository,
-    private val passwordEncoder: PasswordEncoder
+    private val passwordEncoder: PasswordEncoder,
 ) {
     @GetMapping("/auth/login")
-    fun loginPage(@RequestParam(required = false) error: Boolean, model: Model): String {
+    fun loginPage(
+        @RequestParam(required = false) error: Boolean,
+        model: Model,
+    ): String {
         if (error) {
             model.addAttribute("error", "Invalid username or password.")
         }
@@ -27,7 +30,7 @@ class AuthController(
     fun loginUser(
         @RequestParam username: String,
         @RequestParam password: String,
-        model: Model
+        model: Model,
     ): String {
         val user = userRepository.findByUsername(username)
         return if (user != null && passwordEncoder.matches(password, user.password)) {
@@ -49,7 +52,7 @@ class AuthController(
         @RequestParam username: String,
         @RequestParam email: String,
         @RequestParam password: String,
-        redirectAttributes: RedirectAttributes
+        redirectAttributes: RedirectAttributes,
     ): String {
         // Check if username already exists
         if (userRepository.existsByUsername(username)) {
@@ -64,11 +67,12 @@ class AuthController(
         }
 
         // Save the new user
-        val encodedUser = User(
-            username = username,
-            email = email,
-            password = passwordEncoder.encode(password)
-        )
+        val encodedUser =
+            User(
+                username = username,
+                email = email,
+                password = passwordEncoder.encode(password),
+            )
         userRepository.save(encodedUser)
 
         // Add success message for redirect

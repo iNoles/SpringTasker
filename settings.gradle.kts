@@ -1,1 +1,1 @@
-rootProject.name = "taskmanagement"
+rootProject.name = "SpringTasker"

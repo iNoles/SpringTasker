@@ -5,5 +5,5 @@ data class UpdateTaskRequest(
     val description: String? = null,
     val dueDate: String? = null,
     val priority: String? = null,
-    val userId: Long? = null // Add userId field
+    val userId: Long? = null,
 )

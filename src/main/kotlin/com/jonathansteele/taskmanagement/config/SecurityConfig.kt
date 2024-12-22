@@ -11,8 +11,9 @@ import org.springframework.security.web.SecurityFilterChain
 
 @Configuration
 @EnableWebSecurity
-class SecurityConfig(private val env: Environment) {
-
+class SecurityConfig(
+    private val env: Environment,
+) {
     @Bean
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
@@ -35,15 +36,13 @@ class SecurityConfig(private val env: Environment) {
             .authorizeHttpRequests { auth ->
                 auth.requestMatchers("/auth/register", "/auth/login").permitAll() // Allow registration and login
                 auth.anyRequest().authenticated() // Require authentication for all other endpoints
-            }
-            .formLogin { form ->
+            }.formLogin { form ->
                 form
                     .loginPage("/auth/login") // Custom login page
                     .permitAll() // Allow all users to access login page
                     .defaultSuccessUrl("/", true) // Redirect to home page after login
                     .failureUrl("/auth/login?error=true") // Redirect back to login page on error
-            }
-            .logout { logout ->
+            }.logout { logout ->
                 logout
                     .logoutUrl("/auth/logout")
                     .logoutSuccessUrl("/auth/login?logout")
