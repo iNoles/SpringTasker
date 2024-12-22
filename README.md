@@ -55,7 +55,7 @@ Here’s what’s coming next:
 1. Authentication & Authorization
    - Implement JWT for secure authentication
 2. Deployment
-   - Deploy the project on a public website for easy access
+   - Deploy the project on a public site for easy access
 3. Database Integration
    - Upgrade from H2 to a production-grade database (PostgreSQL or MySQL)
 4. API Support
