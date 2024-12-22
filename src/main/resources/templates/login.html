@@ -16,41 +16,31 @@
     ></p>
 
     <!-- Error Message -->
-    <p th:if="${error}" class="text-red-500 text-center mb-4">
-        Invalid username or password
-    </p>
+    <p th:if="${error}" class="text-red-500 text-center mb-4">Invalid username or password</p>
 
     <!-- Login Form -->
     <form th:action="@{/auth/login}" method="post">
         <div class="mb-4">
-            <label for="username" class="block text-gray-700 font-medium"
-            >Username:</label
-            >
+            <label for="username" class="block text-gray-700 font-medium">Username:</label>
             <input
                     type="text"
                     id="username"
                     name="username"
                     class="w-full p-2 mt-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                    required
-            />
+                    required />
         </div>
         <div class="mb-6">
-            <label for="password" class="block text-gray-700 font-medium"
-            >Password:</label
-            >
+            <label for="password" class="block text-gray-700 font-medium">Password:</label>
             <input
                     type="password"
                     id="password"
                     name="password"
                     class="w-full p-2 mt-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                    required
-            />
+                    required />
         </div>
         <div class="mb-4 text-center">
-            <button
-                    type="submit"
-                    class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            >
+            <button type="submit"
+                    class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400">
                 Login
             </button>
         </div>
@@ -60,10 +50,8 @@
     <div class="text-center mt-4">
         <p class="text-gray-600">Don't have an account?</p>
         <a th:href="@{/auth/register}">
-            <button
-                    type="button"
-                    class="bg-gray-200 text-blue-500 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
-            >
+            <button type="button"
+                    class="bg-gray-200 text-blue-500 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400">
                 Register
             </button>
         </a>
