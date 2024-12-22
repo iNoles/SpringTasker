@@ -1,8 +1,8 @@
-## Getting Started
+# Getting Started
 
-### Reference Documentation
+## Reference Documentation
 
-For further reference, please consider the following sections:
+For further reference, consider exploring the following sections:
 
 - [Official Gradle documentation](https://docs.gradle.org)
 - [Spring Boot Gradle Plugin Reference Guide](https://docs.spring.io/spring-boot/3.4.0/gradle-plugin)
@@ -13,9 +13,9 @@ For further reference, please consider the following sections:
 - [Spring Boot DevTools](https://docs.spring.io/spring-boot/3.4.0/reference/using/devtools.html)
 - [Thymeleaf](https://docs.spring.io/spring-boot/3.4.0/reference/web/servlet.html#web.servlet.spring-mvc.template-engines)
 
-### Guides
+## Guides
 
-The following guides illustrate how to use some features concretely:
+The following guides illustrate practical usage:
 
 - [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
 - [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
@@ -26,8 +26,8 @@ The following guides illustrate how to use some features concretely:
 - [Authenticating a User with LDAP](https://spring.io/guides/gs/authenticating-ldap/)
 - [Handling Form Submission](https://spring.io/guides/gs/handling-form-submission/)
 
-### Additional Links
+## Additional Links
 
-These additional references should also help you:
+For insights into your project's Gradle build, consider:
 
 - [Gradle Build Scans – insights for your project's build](https://scans.gradle.com#gradle)
