@@ -5,7 +5,19 @@
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center">
 <div class="w-full max-w-4xl p-6 bg-white shadow-lg rounded-lg">
-  <h1 class="text-3xl font-bold text-center mb-6">Task List</h1>
+
+  <!-- Header Section -->
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold">Task List</h1>
+    <!-- Logout Button -->
+    <form th:action="@{api/auth/logout}" method="post">
+      <button
+              type="submit"
+              class="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400">
+        Logout
+      </button>
+    </form>
+  </div>
 
   <!-- New Task Button -->
   <div class="text-right mb-6">

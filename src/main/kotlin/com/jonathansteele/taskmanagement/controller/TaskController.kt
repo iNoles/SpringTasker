@@ -5,34 +5,42 @@ import com.jonathansteele.taskmanagement.model.User
 import com.jonathansteele.taskmanagement.repository.TaskRepository
 import com.jonathansteele.taskmanagement.repository.UserRepository
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.stereotype.Controller
-import org.springframework.ui.Model
-import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestParam
 import java.time.LocalDate
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.security.core.userdetails.User as SpringUser
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
-@Controller
+@RestController
+@RequestMapping("/api/tasks")
 class TaskController(
     private val taskRepository: TaskRepository,
     private val userRepository: UserRepository,
 ) {
-    // Show the form for adding a task
-    @GetMapping("/tasks/add")
-    fun showAddTaskForm(): String = "addTask"
+    // Get all tasks for the current user
+    @GetMapping
+    fun getAllTasks(): ResponseEntity<List<Task>> {
+        val currentUser = getCurrentUser()
+        val tasks = taskRepository.findByUser(currentUser)
+        return ResponseEntity.ok(tasks)
+    }
 
     // Handle the form submission to add the task
-    @PostMapping("/tasks/add")
+    @PostMapping("/add")
     fun addTask(
         @RequestParam(name = "name") name: String,
         @RequestParam(name = "description", required = false) description: String?,
         @RequestParam(name = "due-date") dueDate: String,
         @RequestParam(name = "priority") priority: String,
         @RequestParam(name = "completed") completed: Boolean,
-        model: Model,
-    ): String {
+    ): ResponseEntity<String> {
         // Get the currently logged-in user
         val currentUser = getCurrentUser()
 
@@ -53,24 +61,10 @@ class TaskController(
         // Save the task to the repository
         taskRepository.save(newTask)
 
-        // Add success message to model
-        model.addAttribute("success", "Task added successfully!")
-
-        // Redirect to the task list page or some other page
-        return "redirect:/"
+        return ResponseEntity.status(HttpStatus.CREATED).body("Task added successfully!")
     }
 
-    @GetMapping("/tasks/edit/{id}")
-    fun editTaskForm(
-        @PathVariable id: Long,
-        model: Model,
-    ): String {
-        val task = taskRepository.findById(id).orElseThrow { IllegalArgumentException("Invalid task ID: $id") }
-        model.addAttribute("task", task)
-        return "editTask"
-    }
-
-    @PostMapping("/tasks/edit")
+    @PutMapping("/{id}")
     fun updateTask(
         @RequestParam id: Long,
         @RequestParam name: String,
@@ -78,26 +72,29 @@ class TaskController(
         @RequestParam(name = "due-date") dueDate: String,
         @RequestParam priority: String,
         @RequestParam(required = false) completed: Boolean,
-    ): String {
-        val task = taskRepository.findById(id).orElseThrow { IllegalArgumentException("Invalid task ID: $id") }
-        taskRepository.save(
-            task.copy(
+    ): ResponseEntity<String> {
+        if (!taskRepository.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Task with ID $id not found")
+        }
+        val task = taskRepository.findById(id).get()
+        val updatedTask = task.copy(
                 name = name,
                 description = description,
                 dueDate = LocalDate.parse(dueDate),
                 priority = priority,
-                completed = completed,
-            ),
+                completed = completed
         )
-        return "redirect:/"
+        taskRepository.save(updatedTask)
+        return ResponseEntity.ok("Task updated successfully!")
     }
 
-    @PostMapping("/tasks/delete/{id}")
-    fun deleteTask(
-        @PathVariable id: Long,
-    ): String {
+    @DeleteMapping("/{id}")
+    fun deleteTask(@PathVariable id: Long): ResponseEntity<String> {
+        if (!taskRepository.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Task with ID $id not found")
+        }
         taskRepository.deleteById(id)
-        return "redirect:/"
+        return ResponseEntity.ok("Task deleted successfully!")
     }
 
     // Get the currently logged-in user

@@ -8,6 +8,8 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestParam
 
 @Controller
 class MainController(
@@ -28,5 +30,30 @@ class MainController(
         val username = authentication.name // Get the username of the authenticated user
         return userRepository.findByUsername(username) // Get the User object from the database
             ?: throw IllegalStateException("User not found") // Handle case where user is not found
+    }
+
+    @GetMapping("/login")
+    fun loginPage(@RequestParam(required = false) logout: Boolean?, model: Model): String {
+        if (logout == true) {
+            model.addAttribute("logoutMessage", "You have been logged out successfully.")
+        }
+        return "login" // Thymeleaf template for the login page
+    }
+
+    @GetMapping("/register")
+    fun registerPage(): String = "register" // Thymeleaf template for the registration page
+
+    // Show the form for adding a task
+    @GetMapping("/tasks/add")
+    fun showAddTaskForm(): String = "addTask"
+
+    @GetMapping("/tasks/edit/{id}")
+    fun editTaskForm(
+        @PathVariable id: Long,
+        model: Model,
+    ): String {
+        val task = taskRepository.findById(id).orElseThrow { IllegalArgumentException("Invalid task ID: $id") }
+        model.addAttribute("task", task)
+        return "editTask"
     }
 }
