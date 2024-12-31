@@ -4,19 +4,19 @@ import com.jonathansteele.taskmanagement.model.Task
 import com.jonathansteele.taskmanagement.model.User
 import com.jonathansteele.taskmanagement.repository.TaskRepository
 import com.jonathansteele.taskmanagement.repository.UserRepository
-import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestParam
-import java.time.LocalDate
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.security.core.userdetails.User as SpringUser
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
+import org.springframework.security.core.userdetails.User as SpringUser
 
 @RestController
 @RequestMapping("/api/tasks")
@@ -77,19 +77,22 @@ class TaskController(
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Task with ID $id not found")
         }
         val task = taskRepository.findById(id).get()
-        val updatedTask = task.copy(
+        val updatedTask =
+            task.copy(
                 name = name,
                 description = description,
                 dueDate = LocalDate.parse(dueDate),
                 priority = priority,
-                completed = completed
-        )
+                completed = completed,
+            )
         taskRepository.save(updatedTask)
         return ResponseEntity.ok("Task updated successfully!")
     }
 
     @DeleteMapping("/{id}")
-    fun deleteTask(@PathVariable id: Long): ResponseEntity<String> {
+    fun deleteTask(
+        @PathVariable id: Long,
+    ): ResponseEntity<String> {
         if (!taskRepository.existsById(id)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Task with ID $id not found")
         }

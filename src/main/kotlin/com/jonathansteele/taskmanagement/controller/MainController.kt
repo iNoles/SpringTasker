@@ -33,7 +33,10 @@ class MainController(
     }
 
     @GetMapping("/login")
-    fun loginPage(@RequestParam(required = false) logout: Boolean?, model: Model): String {
+    fun loginPage(
+        @RequestParam(required = false) logout: Boolean?,
+        model: Model,
+    ): String {
         if (logout == true) {
             model.addAttribute("logoutMessage", "You have been logged out successfully.")
         }

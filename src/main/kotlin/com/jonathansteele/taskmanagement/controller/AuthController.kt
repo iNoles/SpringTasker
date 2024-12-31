@@ -12,7 +12,10 @@ import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/auth")
@@ -20,20 +23,20 @@ class AuthController(
     private val authenticationManager: AuthenticationManager,
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
-    private val jwtUtils: JwtUtils
+    private val jwtUtils: JwtUtils,
 ) {
-
     @PostMapping("/login")
     fun loginUser(
         @RequestParam username: String,
         @RequestParam password: String,
-        response: HttpServletResponse
-    ): ResponseEntity<Map<String, String>> {
-        return try {
+        response: HttpServletResponse,
+    ): ResponseEntity<Map<String, String>> =
+        try {
             // Authenticate the user with the provided credentials
-            val authentication = authenticationManager.authenticate(
-                UsernamePasswordAuthenticationToken(username, password)
-            )
+            val authentication =
+                authenticationManager.authenticate(
+                    UsernamePasswordAuthenticationToken(username, password),
+                )
             SecurityContextHolder.getContext().authentication = authentication
 
             // Generate JWT token for the authenticated user
@@ -48,14 +51,13 @@ class AuthController(
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "An unexpected error occurred"))
         }
-    }
 
     @PostMapping("/register")
     fun registerUser(
         @RequestParam username: String,
         @RequestParam email: String,
-        @RequestParam password: String
-    ): ResponseEntity<Map<String, String>>  {
+        @RequestParam password: String,
+    ): ResponseEntity<Map<String, String>> {
         if (userRepository.existsByUsername(username)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(mapOf("error" to "Username already exists"))
         }
@@ -66,11 +68,12 @@ class AuthController(
             return ResponseEntity.badRequest().body(mapOf("error" to "Password must be at least 8 characters"))
         }
 
-        val encodedUser = User(
-            username = username,
-            email = email,
-            password = passwordEncoder.encode(password)
-        )
+        val encodedUser =
+            User(
+                username = username,
+                email = email,
+                password = passwordEncoder.encode(password),
+            )
         userRepository.save(encodedUser)
         return ResponseEntity.status(HttpStatus.CREATED).body(mapOf("message" to "Registration successful"))
     }
