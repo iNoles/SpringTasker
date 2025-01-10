@@ -4,11 +4,10 @@ import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.SecurityException
+import jakarta.annotation.PostConstruct
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseCookie
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Component
 import org.springframework.web.util.WebUtils
 import java.security.Key
@@ -18,78 +17,77 @@ import javax.crypto.spec.SecretKeySpec
 @Component
 class JwtUtils {
     @Value("\${jwt.secret}")
-    private lateinit var jwtSecret: String
+    private lateinit var jwtSecretString: String
+    private lateinit var signingKey: Key
 
-    val jwtExpirationMs = 3600000 // 1 hour in milliseconds
+    @PostConstruct
+    fun init() {
+        signingKey = SecretKeySpec(jwtSecretString.toByteArray(), SignatureAlgorithm.HS512.jcaName)
+    }
 
-    val jwtCookie = "JWT"
+    val jwtExpirationMs = 900_000L // 15 minutes
+    private val refreshExpirationMs = 7L * 24 * 60 * 60 * 1000 // 7 days
+    private val jwtCookie = "JWT"
+    private val refreshCookieName = "refresh_token"
 
-    private fun getSigningKey(): Key = SecretKeySpec(jwtSecret.toByteArray(), SignatureAlgorithm.HS512.jcaName)
+    private fun getSigningKey(): Key = signingKey
 
     fun getJwtFromCookies(request: HttpServletRequest): String? =
-        WebUtils.getCookie(request, jwtCookie)?.let {
-            it.value ?: null
-        }
+        WebUtils.getCookie(request, jwtCookie)?.value
 
-    // Generate JWT cookie for authenticated user
-    fun generateJwtCookie(authentication: Authentication): ResponseCookie {
-        val userDetails = authentication.principal as UserDetails
-        val jwt = generateJwtTokenFromUsername(userDetails.username)
+    fun generateJwtCookie(username: String): ResponseCookie {
+        val jwt = generateJwtToken(username)
         return ResponseCookie
             .from(jwtCookie, jwt)
             .path("/")
-            .maxAge(24 * 60 * 60)
+            .maxAge(jwtExpirationMs / 1000)
             .httpOnly(true)
             .build()
     }
 
-    // Clear JWT cookie (on logout)
-    fun clearJwtCookie(): ResponseCookie =
-        ResponseCookie
-            .from(jwtCookie, "") // Set value to an empty string
-            .path("/") // Cookie path for clear action
-            .maxAge(0) // Expiry set to 0 to delete the cookie immediately
+    fun generateRefreshCookie(username: String): ResponseCookie {
+        val refreshToken = generateRefreshToken(username)
+        return ResponseCookie.from(refreshCookieName, refreshToken)
+            .path("/")
+            .httpOnly(true)
+            .maxAge(refreshExpirationMs / 1000)
             .build()
-
-    // Generate JWT token from username
-    private fun generateJwtTokenFromUsername(username: String): String =
-        Jwts
-            .builder()
-            .setSubject(username)
-            .setIssuedAt(Date())
-            .setExpiration(Date(Date().time + jwtExpirationMs))
-            .signWith(getSigningKey(), SignatureAlgorithm.HS512) // Updated method
-            .compact()
-
-    // Get username from JWT token
-    fun getUsernameFromJwtToken(token: String): String {
-        val claims =
-            Jwts
-                .parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .body
-        return claims.subject
     }
 
-    // Validate JWT token
-    fun validateJwtToken(token: String): Boolean =
+    fun clearJwtCookie(): ResponseCookie =
+        ResponseCookie.from(jwtCookie, "").path("/").maxAge(0).build()
+
+    fun clearRefreshCookie(): ResponseCookie =
+        ResponseCookie.from(refreshCookieName, "").path("/").httpOnly(true).maxAge(0).build()
+
+    fun generateJwtToken(username: String): String =
+        Jwts.builder()
+            .setSubject(username)
+            .setIssuedAt(Date())
+            .setExpiration(Date(System.currentTimeMillis() + jwtExpirationMs))
+            .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+            .compact()
+
+    fun generateRefreshToken(username: String): String =
+        Jwts.builder()
+            .setSubject(username)
+            .setIssuedAt(Date())
+            .setExpiration(Date(System.currentTimeMillis() + refreshExpirationMs))
+            .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+            .compact()
+
+    fun getUsernameFromToken(token: String): String =
+        Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).body.subject
+
+    fun validateToken(token: String): Boolean =
         try {
-            Jwts
-                .parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
+            Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token)
             true
         } catch (e: ExpiredJwtException) {
-            println("Token expired: ${e.message}")
             false
         } catch (e: SecurityException) {
-            println("JWT security error: ${e.message}")
             false
         } catch (e: Exception) {
-            println("JWT validation error: ${e.message}")
             false
         }
 }

@@ -10,7 +10,7 @@
   <h2 class="text-2xl font-semibold text-center mb-6">Register</h2>
 
   <!-- Register Form -->
-  <form th:action="@{api/auth/register}" method="post">
+  <form th:action="@{api/auth/register}" method="post" onsubmit="return validateForm()">
     <div class="mb-4">
       <label for="username" class="block text-gray-700 font-medium">Username:</label>
       <input
@@ -28,6 +28,7 @@
               name="email"
               class="w-full p-2 mt-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               required />
+      <p id="emailError" class="text-red-500 text-sm mt-1 hidden">Please enter a valid email address.</p>
     </div>
     <div class="mb-6">
       <label for="password" class="block text-gray-700 font-medium">Password:</label>
@@ -37,6 +38,7 @@
               name="password"
               class="w-full p-2 mt-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               required />
+      <p id="passwordError" class="text-red-500 text-sm mt-1 hidden">Password must be at least 8 characters long.</p>
     </div>
     <div class="mb-4 text-center">
       <button type="submit"
@@ -57,6 +59,37 @@
     </a>
   </div>
 </div>
-<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Form Validation Script -->
+<script>
+  function validateForm() {
+    const password = document.getElementById("password").value;
+    const email = document.getElementById("email").value;
+    const passwordError = document.getElementById("passwordError");
+    const emailError = document.getElementById("emailError");
+
+    let isValid = true;
+
+    // Validate password length
+    if (password.length < 8) {
+      passwordError.classList.remove("hidden");
+      isValid = false;
+    } else {
+      passwordError.classList.add("hidden");
+    }
+
+    // Validate email format using regex
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+      emailError.classList.remove("hidden");
+      isValid = false;
+    } else {
+      emailError.classList.add("hidden");
+    }
+
+    return isValid; // Only submit form if both validations pass
+  }
+</script>
+
 </body>
 </html>

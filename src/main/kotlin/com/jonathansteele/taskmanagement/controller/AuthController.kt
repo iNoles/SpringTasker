@@ -3,6 +3,7 @@ package com.jonathansteele.taskmanagement.controller
 import com.jonathansteele.taskmanagement.JwtUtils
 import com.jonathansteele.taskmanagement.model.User
 import com.jonathansteele.taskmanagement.repository.UserRepository
+import io.jsonwebtoken.ExpiredJwtException
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -12,6 +13,7 @@ import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.web.bind.annotation.CookieValue
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -32,18 +34,18 @@ class AuthController(
         response: HttpServletResponse,
     ): ResponseEntity<Map<String, String>> =
         try {
-            // Authenticate the user with the provided credentials
             val authentication =
                 authenticationManager.authenticate(
                     UsernamePasswordAuthenticationToken(username, password),
                 )
             SecurityContextHolder.getContext().authentication = authentication
 
-            // Generate JWT token for the authenticated user
-            val cookie = jwtUtils.generateJwtCookie(authentication)
+            // Use correct JWT token generation method
+            val jwtCookie = jwtUtils.generateJwtCookie(username)
+            val refreshCookie = jwtUtils.generateRefreshCookie(username)
 
-            // Add the cookie to the response header
-            response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString())
+            response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+            response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString())
 
             ResponseEntity.ok(mapOf("message" to "Login successful"))
         } catch (e: BadCredentialsException) {
@@ -51,6 +53,41 @@ class AuthController(
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "An unexpected error occurred"))
         }
+
+    @PostMapping("/refresh")
+    fun refreshAccessToken(
+        @CookieValue(name = "refresh_token", required = false) refreshToken: String?,
+        response: HttpServletResponse
+    ): ResponseEntity<Map<String, String>> {
+        if (refreshToken.isNullOrBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(mapOf("error" to "Refresh token is missing"))
+        }
+
+        try {
+            if (!jwtUtils.validateToken(refreshToken)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(mapOf("error" to "Invalid refresh token"))
+            }
+
+            val username = jwtUtils.getUsernameFromToken(refreshToken)
+            val newAccessToken = jwtUtils.generateJwtToken(username)
+            val jwtCookie = jwtUtils.generateJwtCookie(username)
+
+            response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+
+            return ResponseEntity.ok(
+                mapOf(
+                    "access_token" to newAccessToken,
+                    "expires_in" to (jwtUtils.jwtExpirationMs / 1000).toString()
+                )
+            )
+        } catch (e: ExpiredJwtException) {
+            val expiredRefreshCookie = jwtUtils.clearRefreshCookie()
+            response.addHeader(HttpHeaders.SET_COOKIE, expiredRefreshCookie.toString())
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(mapOf("error" to "Refresh token expired"))
+        } catch (e: Exception) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "Unexpected error occurred"))
+        }
+    }
 
     @PostMapping("/register")
     fun registerUser(
@@ -64,7 +101,10 @@ class AuthController(
         if (userRepository.existsByEmail(email)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(mapOf("error" to "Email already exists"))
         }
-        if (password.length < 8) { // Example password policy
+        if (!email.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$"))) {
+            return ResponseEntity.badRequest().body(mapOf("error" to "Invalid email format"))
+        }
+        if (password.length < 8) {
             return ResponseEntity.badRequest().body(mapOf("error" to "Password must be at least 8 characters"))
         }
 
@@ -80,11 +120,12 @@ class AuthController(
 
     @PostMapping("/logout")
     fun logoutUser(response: HttpServletResponse): ResponseEntity<Map<String, String>> {
-        // Clear JWT token
-        val cookie = jwtUtils.clearJwtCookie()
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString())
+        val jwtCookie = jwtUtils.clearJwtCookie()
+        val refreshCookie = jwtUtils.clearRefreshCookie()
 
-        // Invalidate session (if any)
+        response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+
         SecurityContextHolder.clearContext()
 
         return ResponseEntity.ok(mapOf("message" to "Logged out successfully"))
