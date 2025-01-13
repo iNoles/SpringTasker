@@ -6,16 +6,16 @@ SpringTasker is a task management application built using Spring Boot and Kotlin
 
 ### User Authentication & Authorization
 - Session-based login/logout for UI users
-- JWT authentication for API clients
+- JWT-based authentication for API clients
 
-### Task Management
+### Managing Tasks
 - Create, edit, and delete tasks
 - Mark tasks as completed
 - Set priority levels (Low, Medium, High)
 
 ### Security Enhancements
 - CSRF protection for form logins
-- Stateless JWT authentication for APIs
+- Stateless JWT-based authentication for APIs
 
 ## Technologies Used 🛠️
 
@@ -29,11 +29,11 @@ SpringTasker is a task management application built using Spring Boot and Kotlin
 
 ## Authentication Methods 🔐
 
-| Endpoint                | Authentication Method         | Notes                                   |
-|-------------------------|-------------------------------|-----------------------------------------|
-| `/login`, `/register`    | Session-based with CSRF protection | For UI users                           |
-| `/api/auth/*`            | JWT Authentication            | For API clients                        |
-| `/logout`                | Invalidates session and JWT   | Supports both methods                  |
+| Endpoint                | Authentication Method           | Notes                                   |
+|-------------------------|--------------------------------|-----------------------------------------|
+| `/login`, `/register`   | Session-based with CSRF protection | For UI users                           |
+| `/api/auth/*`           | JWT-based Authentication       | For API clients                        |
+| `/logout`               | Invalidates session and JWT   | Supports both methods                  |
 
 ## Getting Started 💡
 
@@ -91,8 +91,6 @@ Here’s what’s coming next:
    - Deploy the project on a public site for easy access
 2. Database Integration
    - Upgrade from H2 to a production-grade database (PostgreSQL or MySQL)
-4. Improved API Security
-   - Implement refresh tokens for JWT authentication
 
 ## Contributions 🤝
 
