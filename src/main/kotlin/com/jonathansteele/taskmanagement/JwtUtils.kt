@@ -32,8 +32,7 @@ class JwtUtils {
 
     private fun getSigningKey(): Key = signingKey
 
-    fun getJwtFromCookies(request: HttpServletRequest): String? =
-        WebUtils.getCookie(request, jwtCookie)?.value
+    fun getJwtFromCookies(request: HttpServletRequest): String? = WebUtils.getCookie(request, jwtCookie)?.value
 
     fun generateJwtCookie(username: String): ResponseCookie {
         val jwt = generateJwtToken(username)
@@ -47,7 +46,8 @@ class JwtUtils {
 
     fun generateRefreshCookie(username: String): ResponseCookie {
         val refreshToken = generateRefreshToken(username)
-        return ResponseCookie.from(refreshCookieName, refreshToken)
+        return ResponseCookie
+            .from(refreshCookieName, refreshToken)
             .path("/")
             .httpOnly(true)
             .maxAge(refreshExpirationMs / 1000)
@@ -55,13 +55,23 @@ class JwtUtils {
     }
 
     fun clearJwtCookie(): ResponseCookie =
-        ResponseCookie.from(jwtCookie, "").path("/").maxAge(0).build()
+        ResponseCookie
+            .from(jwtCookie, "")
+            .path("/")
+            .maxAge(0)
+            .build()
 
     fun clearRefreshCookie(): ResponseCookie =
-        ResponseCookie.from(refreshCookieName, "").path("/").httpOnly(true).maxAge(0).build()
+        ResponseCookie
+            .from(refreshCookieName, "")
+            .path("/")
+            .httpOnly(true)
+            .maxAge(0)
+            .build()
 
     fun generateJwtToken(username: String): String =
-        Jwts.builder()
+        Jwts
+            .builder()
             .setSubject(username)
             .setIssuedAt(Date())
             .setExpiration(Date(System.currentTimeMillis() + jwtExpirationMs))
@@ -69,7 +79,8 @@ class JwtUtils {
             .compact()
 
     fun generateRefreshToken(username: String): String =
-        Jwts.builder()
+        Jwts
+            .builder()
             .setSubject(username)
             .setIssuedAt(Date())
             .setExpiration(Date(System.currentTimeMillis() + refreshExpirationMs))
@@ -77,11 +88,20 @@ class JwtUtils {
             .compact()
 
     fun getUsernameFromToken(token: String): String =
-        Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).body.subject
+        Jwts
+            .parserBuilder()
+            .setSigningKey(getSigningKey())
+            .build()
+            .parseClaimsJws(token)
+            .body.subject
 
     fun validateToken(token: String): Boolean =
         try {
-            Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token)
+            Jwts
+                .parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
             true
         } catch (e: ExpiredJwtException) {
             false

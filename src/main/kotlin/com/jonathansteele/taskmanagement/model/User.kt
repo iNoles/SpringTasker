@@ -26,7 +26,7 @@ data class User(
     @Column(nullable = false)
     var updatedAt: LocalDateTime = LocalDateTime.now(),
     @Column(name = "refresh_token")
-    var refreshToken: String? = null
+    var refreshToken: String? = null,
 ) {
     @PreUpdate
     fun onUpdate() {

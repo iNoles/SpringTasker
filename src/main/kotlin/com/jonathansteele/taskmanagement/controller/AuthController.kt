@@ -57,7 +57,7 @@ class AuthController(
     @PostMapping("/refresh")
     fun refreshAccessToken(
         @CookieValue(name = "refresh_token", required = false) refreshToken: String?,
-        response: HttpServletResponse
+        response: HttpServletResponse,
     ): ResponseEntity<Map<String, String>> {
         if (refreshToken.isNullOrBlank()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(mapOf("error" to "Refresh token is missing"))
@@ -77,8 +77,8 @@ class AuthController(
             return ResponseEntity.ok(
                 mapOf(
                     "access_token" to newAccessToken,
-                    "expires_in" to (jwtUtils.jwtExpirationMs / 1000).toString()
-                )
+                    "expires_in" to (jwtUtils.jwtExpirationMs / 1000).toString(),
+                ),
             )
         } catch (e: ExpiredJwtException) {
             val expiredRefreshCookie = jwtUtils.clearRefreshCookie()
