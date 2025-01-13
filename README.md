@@ -5,15 +5,18 @@ SpringTasker is a task management application built using Spring Boot and Kotlin
 ## Features 🌟
 
 ### User Authentication & Authorization
+
 - Session-based login/logout for UI users
 - JWT-based authentication for API clients
 
 ### Managing Tasks
+
 - Create, edit, and delete tasks
 - Mark tasks as completed
 - Set priority levels (Low, Medium, High)
 
 ### Security Enhancements
+
 - CSRF protection for form logins
 - Stateless JWT-based authentication for APIs
 
@@ -29,11 +32,11 @@ SpringTasker is a task management application built using Spring Boot and Kotlin
 
 ## Authentication Methods 🔐
 
-| Endpoint                | Authentication Method           | Notes                                   |
-|-------------------------|--------------------------------|-----------------------------------------|
-| `/login`, `/register`   | Session-based with CSRF protection | For UI users                           |
-| `/api/auth/*`           | JWT-based Authentication       | For API clients                        |
-| `/logout`               | Invalidates session and JWT   | Supports both methods                  |
+| Endpoint              | Authentication Method              | Notes                 |
+| --------------------- | ---------------------------------- | --------------------- |
+| `/login`, `/register` | Session-based with CSRF protection | For UI users          |
+| `/api/auth/*`         | JWT-based Authentication           | For API clients       |
+| `/logout`             | Invalidates session and JWT        | Supports both methods |
 
 ## Getting Started 💡
 
@@ -64,24 +67,25 @@ SpringTasker is a task management application built using Spring Boot and Kotlin
    ```arduino
    http://localhost:8080
    ```
+
 ## API Endpoints 📡
 
 ### Authentication
 
-| Method | Endpoint              | Description               |
-|--------|-----------------------|---------------------------|
-| POST   | `/api/auth/login`      | Login and receive JWT token |
-| POST   | `/api/auth/register`   | Register a new user        |
-| POST   | `/api/auth/logout`     | Invalidate JWT token       |
+| Method | Endpoint             | Description                 |
+| ------ | -------------------- | --------------------------- |
+| POST   | `/api/auth/login`    | Login and receive JWT token |
+| POST   | `/api/auth/register` | Register a new user         |
+| POST   | `/api/auth/logout`   | Invalidate JWT token        |
 
 ### Task Management
 
-| Method   | Endpoint                   | Description             |
-|----------|----------------------------|-------------------------|
-| GET      | `/api/tasks/`             | Get all tasks by current user |
-| POST     | `/api/tasks/add`          | Add a new task          |
-| PUT      | `/api/tasks/{id}`         | Update a task           |
-| DELETE   | `/api/tasks/{id}`         | Delete a task           |
+| Method | Endpoint          | Description                   |
+| ------ | ----------------- | ----------------------------- |
+| GET    | `/api/tasks/`     | Get all tasks by current user |
+| POST   | `/api/tasks/add`  | Add a new task                |
+| PUT    | `/api/tasks/{id}` | Update a task                 |
+| DELETE | `/api/tasks/{id}` | Delete a task                 |
 
 ## Roadmap 🛤️
 
