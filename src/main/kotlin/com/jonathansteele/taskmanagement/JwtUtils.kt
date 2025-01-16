@@ -2,7 +2,7 @@ package com.jonathansteele.taskmanagement
 
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.SecurityException
 import jakarta.annotation.PostConstruct
 import jakarta.servlet.http.HttpServletRequest
@@ -10,27 +10,27 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseCookie
 import org.springframework.stereotype.Component
 import org.springframework.web.util.WebUtils
-import java.security.Key
+import java.util.Base64
 import java.util.Date
-import javax.crypto.spec.SecretKeySpec
+import javax.crypto.SecretKey
 
 @Component
 class JwtUtils {
     @Value("\${jwt.secret}")
     private lateinit var jwtSecretString: String
-    private lateinit var signingKey: Key
+    private lateinit var signingKey: SecretKey
 
     @PostConstruct
     fun init() {
-        signingKey = SecretKeySpec(jwtSecretString.toByteArray(), SignatureAlgorithm.HS512.jcaName)
+        // Ensure the secret is properly converted into a 256-bit (32-byte) key for HS256
+        val keyBytes = Base64.getDecoder().decode(jwtSecretString)
+        signingKey = Keys.hmacShaKeyFor(keyBytes)
     }
 
     val jwtExpirationMs = 900_000L // 15 minutes
     private val refreshExpirationMs = 7L * 24 * 60 * 60 * 1000 // 7 days
     private val jwtCookie = "JWT"
     private val refreshCookieName = "refresh_token"
-
-    private fun getSigningKey(): Key = signingKey
 
     fun getJwtFromCookies(request: HttpServletRequest): String? = WebUtils.getCookie(request, jwtCookie)?.value
 
@@ -69,39 +69,39 @@ class JwtUtils {
             .maxAge(0)
             .build()
 
-    fun generateJwtToken(username: String): String =
-        Jwts
+    fun generateJwtToken(username: String): String {
+        return Jwts
             .builder()
-            .setSubject(username)
-            .setIssuedAt(Date())
-            .setExpiration(Date(System.currentTimeMillis() + jwtExpirationMs))
-            .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+            .subject(username)
+            .issuedAt(Date())
+            .expiration(Date(System.currentTimeMillis() + jwtExpirationMs))
+            .signWith(signingKey)
             .compact()
+    }
 
     fun generateRefreshToken(username: String): String =
         Jwts
             .builder()
-            .setSubject(username)
-            .setIssuedAt(Date())
-            .setExpiration(Date(System.currentTimeMillis() + refreshExpirationMs))
-            .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+            .subject(username)
+            .issuedAt(Date())
+            .expiration(Date(System.currentTimeMillis() + refreshExpirationMs))
+            .signWith(signingKey)
             .compact()
 
     fun getUsernameFromToken(token: String): String =
-        Jwts
-            .parserBuilder()
-            .setSigningKey(getSigningKey())
+        Jwts.parser()
+            .verifyWith(signingKey)
             .build()
-            .parseClaimsJws(token)
-            .body.subject
+            .parseSignedClaims(token)
+            .payload
+            .subject
 
     fun validateToken(token: String): Boolean =
         try {
-            Jwts
-                .parserBuilder()
-                .setSigningKey(getSigningKey())
+            Jwts.parser()
+                .verifyWith(signingKey)
                 .build()
-                .parseClaimsJws(token)
+                .parseSignedClaims(token)
             true
         } catch (e: ExpiredJwtException) {
             false
