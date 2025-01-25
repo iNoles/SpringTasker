@@ -69,15 +69,14 @@ class JwtUtils {
             .maxAge(0)
             .build()
 
-    fun generateJwtToken(username: String): String {
-        return Jwts
+    fun generateJwtToken(username: String): String =
+        Jwts
             .builder()
             .subject(username)
             .issuedAt(Date())
             .expiration(Date(System.currentTimeMillis() + jwtExpirationMs))
             .signWith(signingKey)
             .compact()
-    }
 
     fun generateRefreshToken(username: String): String =
         Jwts
@@ -89,7 +88,8 @@ class JwtUtils {
             .compact()
 
     fun getUsernameFromToken(token: String): String =
-        Jwts.parser()
+        Jwts
+            .parser()
             .verifyWith(signingKey)
             .build()
             .parseSignedClaims(token)
@@ -98,7 +98,8 @@ class JwtUtils {
 
     fun validateToken(token: String): Boolean =
         try {
-            Jwts.parser()
+            Jwts
+                .parser()
                 .verifyWith(signingKey)
                 .build()
                 .parseSignedClaims(token)
