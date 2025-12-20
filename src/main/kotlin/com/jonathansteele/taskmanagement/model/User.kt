@@ -20,7 +20,7 @@ data class User(
     @Column(nullable = false, unique = true, length = 100)
     var email: String,
     @Column(nullable = false)
-    var password: String,
+    var password: String?,
     @Column(nullable = false, updatable = false)
     var createdAt: LocalDateTime = LocalDateTime.now(),
     @Column(nullable = false)

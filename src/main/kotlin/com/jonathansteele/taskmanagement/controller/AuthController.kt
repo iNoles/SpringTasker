@@ -48,9 +48,9 @@ class AuthController(
             response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString())
 
             ResponseEntity.ok(mapOf("message" to "Login successful"))
-        } catch (e: BadCredentialsException) {
+        } catch (_: BadCredentialsException) {
             ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(mapOf("error" to "Invalid username or password"))
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "An unexpected error occurred"))
         }
 
@@ -80,11 +80,11 @@ class AuthController(
                     "expires_in" to (jwtUtils.jwtExpirationMs / 1000).toString(),
                 ),
             )
-        } catch (e: ExpiredJwtException) {
+        } catch (_: ExpiredJwtException) {
             val expiredRefreshCookie = jwtUtils.clearRefreshCookie()
             response.addHeader(HttpHeaders.SET_COOKIE, expiredRefreshCookie.toString())
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(mapOf("error" to "Refresh token expired"))
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "Unexpected error occurred"))
         }
     }

@@ -16,7 +16,7 @@ import javax.crypto.SecretKey
 
 @Component
 class JwtUtils {
-    @Value("\${jwt.secret}")
+    @Value($$"${jwt.secret}")
     private lateinit var jwtSecretString: String
     private lateinit var signingKey: SecretKey
 
@@ -32,60 +32,40 @@ class JwtUtils {
     private val jwtCookie = "JWT"
     private val refreshCookieName = "refresh_token"
 
-    fun getJwtFromCookies(request: HttpServletRequest): String? = WebUtils.getCookie(request, jwtCookie)?.value
+    fun getJwtFromCookies(request: HttpServletRequest): String? =
+        WebUtils.getCookie(request, jwtCookie)?.value
 
     fun generateJwtCookie(username: String): ResponseCookie {
         val jwt = generateJwtToken(username)
-        return ResponseCookie
-            .from(jwtCookie, jwt)
-            .path("/")
-            .maxAge(jwtExpirationMs / 1000)
-            .httpOnly(true)
-            .build()
+        val maxAge = jwtExpirationMs / 1000
+        return generateOrClearCookie(jwt, maxAge)
     }
 
     fun generateRefreshCookie(username: String): ResponseCookie {
         val refreshToken = generateRefreshToken(username)
-        return ResponseCookie
-            .from(refreshCookieName, refreshToken)
-            .path("/")
-            .httpOnly(true)
-            .maxAge(refreshExpirationMs / 1000)
-            .build()
+        val maxAge = refreshExpirationMs / 1000
+        return generateOrClearCookie(refreshToken, maxAge)
     }
 
     fun clearJwtCookie(): ResponseCookie =
-        ResponseCookie
-            .from(jwtCookie, "")
-            .path("/")
-            .maxAge(0)
-            .build()
+        generateOrClearCookie(jwtCookie, 0)
 
     fun clearRefreshCookie(): ResponseCookie =
+        generateOrClearCookie(refreshCookieName, 0)
+
+    private fun generateOrClearCookie(cookieName: String, maxAge: Long): ResponseCookie =
         ResponseCookie
-            .from(refreshCookieName, "")
+            .from(cookieName, "")
             .path("/")
             .httpOnly(true)
-            .maxAge(0)
+            .maxAge(maxAge)
             .build()
 
     fun generateJwtToken(username: String): String =
-        Jwts
-            .builder()
-            .subject(username)
-            .issuedAt(Date())
-            .expiration(Date(System.currentTimeMillis() + jwtExpirationMs))
-            .signWith(signingKey)
-            .compact()
+        generateToken(username, jwtExpirationMs)
 
     fun generateRefreshToken(username: String): String =
-        Jwts
-            .builder()
-            .subject(username)
-            .issuedAt(Date())
-            .expiration(Date(System.currentTimeMillis() + refreshExpirationMs))
-            .signWith(signingKey)
-            .compact()
+        generateToken(username, refreshExpirationMs)
 
     fun getUsernameFromToken(token: String): String =
         Jwts
@@ -96,6 +76,15 @@ class JwtUtils {
             .payload
             .subject
 
+    private fun generateToken(username: String, expirationMs: Long): String =
+        Jwts
+            .builder()
+            .subject(username)
+            .issuedAt(Date())
+            .expiration(Date(System.currentTimeMillis() + expirationMs))
+            .signWith(signingKey)
+            .compact()
+
     fun validateToken(token: String): Boolean =
         try {
             Jwts
@@ -104,11 +93,11 @@ class JwtUtils {
                 .build()
                 .parseSignedClaims(token)
             true
-        } catch (e: ExpiredJwtException) {
+        } catch (_: ExpiredJwtException) {
             false
-        } catch (e: SecurityException) {
+        } catch (_: SecurityException) {
             false
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
 }

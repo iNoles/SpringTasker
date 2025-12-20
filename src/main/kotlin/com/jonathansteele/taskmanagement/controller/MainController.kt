@@ -26,8 +26,8 @@ class MainController(
     }
 
     private fun getCurrentUser(): User {
-        val authentication: Authentication = SecurityContextHolder.getContext().authentication
-        val username = authentication.name // Get the username of the authenticated user
+        val authentication: Authentication? = SecurityContextHolder.getContext().authentication
+        val username = authentication?.name // Get the username of the authenticated user
         return userRepository.findByUsername(username) // Get the User object from the database
             ?: throw IllegalStateException("User not found") // Handle case where user is not found
     }

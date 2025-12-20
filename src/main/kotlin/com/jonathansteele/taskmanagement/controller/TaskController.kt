@@ -26,8 +26,9 @@ class TaskController(
 ) {
     // Get all tasks for the current user
     @GetMapping
-    fun getAllTasks(): ResponseEntity<List<Task>> {
-        val currentUser = getCurrentUser()
+    fun getAllTasks(): ResponseEntity<out Any>? {
+        val currentUser =
+            getCurrentUser() ?: return ResponseEntity.status(HttpStatus.NOT_FOUND).body("user not found")
         val tasks = taskRepository.findByUser(currentUser)
         return ResponseEntity.ok(tasks)
     }
@@ -42,7 +43,8 @@ class TaskController(
         @RequestParam(name = "completed") completed: Boolean,
     ): ResponseEntity<String> {
         // Get the currently logged-in user
-        val currentUser = getCurrentUser()
+        val currentUser =
+            getCurrentUser() ?: return ResponseEntity.status(HttpStatus.NOT_FOUND).body("user not found")
 
         // Parse the due date
         val parsedDueDate = LocalDate.parse(dueDate)
@@ -101,8 +103,8 @@ class TaskController(
     }
 
     // Get the currently logged-in user
-    private fun getCurrentUser(): User {
-        val username = (SecurityContextHolder.getContext().authentication.principal as SpringUser).username
-        return userRepository.findByUsername(username)!!
+    private fun getCurrentUser(): User? {
+        val username = (SecurityContextHolder.getContext().authentication?.principal as? SpringUser)?.username
+        return userRepository.findByUsername(username)
     }
 }
