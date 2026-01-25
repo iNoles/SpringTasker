@@ -51,7 +51,8 @@ class JwtUtils {
     fun clearRefreshCookie(): ResponseCookie = generateOrClearCookie(refreshCookieName, 0)
 
     private fun generateOrClearCookie(
-        cookieName: String, maxAge: Long,
+        cookieName: String,
+        maxAge: Long,
     ): ResponseCookie =
         ResponseCookie
             .from(cookieName, "")
@@ -74,7 +75,8 @@ class JwtUtils {
             .subject
 
     private fun generateToken(
-        username: String, expirationMs: Long
+        username: String,
+        expirationMs: Long,
     ): String =
         Jwts
             .builder()
