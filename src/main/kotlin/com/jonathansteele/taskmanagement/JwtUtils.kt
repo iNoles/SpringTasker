@@ -50,7 +50,9 @@ class JwtUtils {
 
     fun clearRefreshCookie(): ResponseCookie = generateOrClearCookie(refreshCookieName, 0)
 
-    private fun generateOrClearCookie(cookieName: String, maxAge: Long): ResponseCookie =
+    private fun generateOrClearCookie(
+        cookieName: String, maxAge: Long
+    ): ResponseCookie =
         ResponseCookie
             .from(cookieName, "")
             .path("/")
