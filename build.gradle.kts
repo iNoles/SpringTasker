@@ -3,7 +3,7 @@ plugins {
     kotlin("plugin.spring") version "2.4.20"
     id("org.springframework.boot") version "4.1.1"
     id("io.spring.dependency-management") version "1.1.7"
-    kotlin("plugin.jpa") version "2.4.20"
+    kotlin("plugin.jpa") version "2.4.21"
 }
 
 group = "com.jonathansteele"
